@@ -4,101 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IKBOL 스탯 계산기 v3</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        /* 모바일 전체 화면 설정 */
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
-            padding: 10px; 
-            margin: 0; 
-            background-color: #f4f7f9;
-            width: 100%;
-        }
-        .container { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px; /* PC에서는 적당한 너비 유지 */
-            margin: 0 auto;
-        }
-        h2 { text-align: center; color: #1a237e; margin-bottom: 20px; }
+        * { box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         
-        /* 검색창 */
+        body { 
+            margin: 0; 
+            padding: 10px; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 500px; 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h2 { text-align: center; color: #1e3a8a; margin-bottom: 25px; font-weight: 800; letter-spacing: -1px; }
+
+        /* 검색 섹션 */
         .search-box { 
-            background-color: #e3f2fd; 
+            background-color: #eff6ff; 
             padding: 15px; 
-            border-radius: 10px; 
+            border-radius: 12px; 
             margin-bottom: 20px;
+            border: 1px solid #dbeafe;
         }
         .search-row { display: flex; gap: 8px; }
-        .search-row input { flex: 1; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; }
+        .search-row input { 
+            flex: 1; 
+            padding: 12px; 
+            border: 1px solid #bfdbfe; 
+            border-radius: 8px; 
+            font-size: 16px;
+        }
         .search-row button { 
-            padding: 10px 15px; 
-            background-color: #1976d2; 
+            padding: 0 20px; 
+            background-color: #2563eb; 
             color: white; 
             border: none; 
-            border-radius: 6px; 
+            border-radius: 8px; 
+            font-weight: bold; 
             cursor: pointer;
-            font-weight: bold;
         }
 
-        /* 상세 내역 (조회시 나타남) */
+        /* 상세 내역 */
         .details-box { 
             display: none; 
-            margin-top: 12px; 
+            margin-top: 15px; 
+            background: #fff; 
+            padding: 10px; 
+            border-radius: 8px; 
             font-size: 0.85em; 
-            border-top: 1px dashed #90caf9; 
-            padding-top: 10px; 
+            border: 1px solid #e2e8f0;
         }
-        .details-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: #555; }
+        .details-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: #475569; }
 
         /* 입력 그룹 */
-        .input-group { 
-            margin-bottom: 15px; 
-            display: flex; 
-            flex-direction: column; /* 모바일에서 글자 넘침 방지를 위해 세로 배치 권장 */
-            gap: 5px;
+        .input-group { margin-bottom: 18px; }
+        .input-group label { 
+            display: block; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: #4b5563; 
+            margin-bottom: 6px; 
+            margin-left: 2px;
         }
-        .input-group label { font-weight: bold; color: #333; font-size: 0.9em; }
-        .input-group input, .input-group select { 
-            padding: 12px; 
+        .input-row { display: flex; gap: 8px; }
+        .input-row input { flex: 1; text-align: center; }
+
+        input, select { 
             width: 100%; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            font-size: 16px; /* 모바일 줌 현상 방지 */
+            padding: 12px; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            background-color: #f9fafb;
         }
+        input:focus { outline: 2px solid #3b82f6; background-color: #fff; }
 
         /* 결과 창 */
         .result-box { 
             margin-top: 25px; 
-            padding: 20px; 
-            background: linear-gradient(135deg, #1a237e, #283593); 
+            padding: 25px; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); 
             color: white; 
-            border-radius: 10px; 
-            text-align: center; 
+            border-radius: 16px; 
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
         }
-        .pure-text { font-size: 0.9em; opacity: 0.8; }
-        .final-score { font-size: 2.5em; font-weight: bold; color: #ffeb3b; display: block; margin: 5px 0; }
+        .pure-text { font-size: 0.9em; opacity: 0.85; margin-bottom: 5px; }
+        .final-score { font-size: 2.8em; font-weight: 800; color: #fbbf24; display: block; }
 
         /* 하단 링크 */
-        .footer-link {
-            text-align: center;
-            margin-top: 30px;
-            padding-bottom: 20px;
+        .footer-link { margin-top: 20px; text-align: center; }
+        .footer-link a { 
+            text-decoration: none; 
+            color: #64748b; 
+            font-size: 0.9em; 
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .footer-link a {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: #333;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 25px;
-            font-size: 0.9em;
-            transition: background 0.3s;
-        }
-        .footer-link a:hover { background-color: #555; }
     </style>
 </head>
 <body>
@@ -111,7 +125,7 @@
             <input type="text" id="nicknameInput" placeholder="닉네임 입력">
             <button onclick="searchNickname()">조회</button>
         </div>
-        <p id="searchMsg" style="margin: 8px 0 0 0; font-size: 0.8em; text-align: center;"></p>
+        <p id="searchMsg" style="margin: 10px 0 0 0; font-size: 0.8em; text-align: center; font-weight: 600;"></p>
 
         <div id="detailArea" class="details-box">
             <div id="detailContent"></div>
@@ -119,16 +133,16 @@
     </div>
 
     <div class="input-group">
-        <label>방문수 / 게시글 / 댓글</label>
-        <div style="display:flex; gap:5px;">
+        <label>활동 스탯 (방문 / 게시글 / 댓글)</label>
+        <div class="input-row">
             <input type="number" id="visits" placeholder="방문" oninput="calc()">
-            <input type="number" id="posts" placeholder="게시글" oninput="calc()">
+            <input type="number" id="posts" placeholder="글" oninput="calc()">
             <input type="number" id="comments" placeholder="댓글" oninput="calc()">
         </div>
     </div>
 
     <div class="input-group">
-        <label>신인 버프 선택 (1~3년차)</label>
+        <label>신인 버프 연차 선택</label>
         <select id="yearSelect" onchange="calc()">
             <option value="0">해당 없음(4년차 이상)</option>
             <option value="30">1년차 (+30)</option>
@@ -138,19 +152,19 @@
     </div>
 
     <div class="input-group">
-        <label style="color:#2e7d32;">총 버프(+)</label> 
-        <input type="number" id="totalBuff" value="0" oninput="calc()" style="background:#f1f8e9; border-color:#a5d6a7;">
+        <label style="color:#15803d;">총 버프(+)</label> 
+        <input type="number" id="totalBuff" value="0" oninput="calc()" style="background:#f0fdf4; border-color:#bbf7d0;">
     </div>
 
     <div class="input-group">
-        <label style="color:#c62828;">총 너프(-)</label> 
-        <input type="number" id="totalNerf" value="0" oninput="calc()" style="background:#fff1f1; border-color:#ef9a9a;">
+        <label style="color:#b91c1c;">총 너프(-)</label> 
+        <input type="number" id="totalNerf" value="0" oninput="calc()" style="background:#fef2f2; border-color:#fecaca;">
     </div>
 
     <div class="result-box">
-        <div class="pure-text">순수 스탯: <span id="pureStats">0</span></div>
+        <div class="pure-text">순수 활동 스탯: <span id="pureStats">0</span></div>
         <span class="final-score" id="finalStats">0</span>
-        <div style="font-size:0.8em; color:#e0e0e0;">최종 적용 스탯</div>
+        <div style="font-size:0.85em; opacity: 0.9;">최종 적용 스탯</div>
     </div>
 </div>
 
@@ -159,9 +173,9 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "여기에_새로_배포한_웹앱_URL_입력"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec"; 
 
-    // 가중치 (1/70 등)
+    // 가중치 설정
     const W_VISIT = 1/70;
     const W_POST = 1/30;
     const W_COMMENT = 1/350;
@@ -172,39 +186,35 @@
         const detailArea = document.getElementById('detailArea');
         const detailContent = document.getElementById('detailContent');
 
-        if(!nick) { alert("닉네임을 입력해주세요!"); return; }
-        msg.innerText = "데이터 로딩 중...";
-        msg.style.color = "gray";
+        if(!nick) { alert("닉네임을 입력하세요."); return; }
+        msg.innerText = "데이터를 불러오는 중...";
+        msg.style.color = "#64748b";
 
         fetch(SCRIPT_URL + "?nickname=" + encodeURIComponent(nick))
             .then(res => res.json())
             .then(data => {
                 if(data.result === "success") {
-                    msg.innerText = "✅ '" + data.nickname + "'님 정보 적용 완료";
-                    msg.style.color = "#1976d2";
+                    msg.innerText = "✅ '" + data.nickname + "'님 데이터 적용 완료";
+                    msg.style.color = "#2563eb";
 
-                    // 상세 내역 텍스트 생성
                     const d = data.details;
-                    let html = `
-                        <div class="details-row"><span>보존/신인/군대:</span> <span>${d.preservation}/${d.rookie}/${d.army}</span></div>
-                        <div class="details-row"><span>국대/교육(승/우):</span> <span>${d.national}/${d.eduWin}/${d.eduMvp}</span></div>
-                        <div class="details-row"><span>기타 버프:</span> <span>${d.buffEtc}</span></div>
-                        <div class="details-row" style="color:#c62828;"><span>은퇴/노화/기타너프:</span> <span>${d.retire}/${d.aging}/${d.nerfEtc}</span></div>
+                    detailContent.innerHTML = `
+                        <div class="details-row"><span>보존/신인/군대:</span> <b>${d.preservation}/${d.rookie}/${d.army}</b></div>
+                        <div class="details-row"><span>국대/교육(승/우):</span> <b>${d.national}/${d.eduWin}/${d.eduMvp}</b></div>
+                        <div class="details-row"><span>기타 버프:</span> <b>${d.buffEtc}</b></div>
+                        <div class="details-row" style="color:#b91c1c;"><span>은퇴/노화/기타너프:</span> <b>${d.retire}/${d.aging}/${d.nerfEtc}</b></div>
                     `;
-                    detailContent.innerHTML = html;
                     detailArea.style.display = "block";
 
-                    // 값 입력 (수정 가능하도록 설정됨)
                     document.getElementById('totalBuff').value = data.totalBuff;
                     document.getElementById('totalNerf').value = data.totalNerf;
-
                     calc();
                 } else {
-                    msg.innerText = "❌ 닉네임을 찾을 수 없습니다.";
-                    msg.style.color = "red";
+                    msg.innerText = "❌ 정보를 찾을 수 없습니다.";
+                    msg.style.color = "#ef4444";
                 }
             })
-            .catch(() => { msg.innerText = "오류가 발생했습니다."; });
+            .catch(() => { msg.innerText = "네트워크 오류가 발생했습니다."; });
     }
 
     function calc() {
