@@ -54,17 +54,21 @@
             cursor: pointer;
         }
 
-        /* 상세 내역 */
+        /* 상세 내역 (한 줄씩 표시) */
         .details-box { 
             display: none; 
             margin-top: 15px; 
             background: #fff; 
-            padding: 10px; 
+            padding: 12px; 
             border-radius: 8px; 
             font-size: 0.85em; 
             border: 1px solid #e2e8f0;
         }
-        .details-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: #475569; }
+        .details-title { font-weight: 700; color: #1e3a8a; margin-bottom: 8px; display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        .details-row { display: flex; justify-content: space-between; margin-bottom: 4px; padding: 2px 0; border-bottom: 1px solid #f8fafc; }
+        .details-row:last-child { border-bottom: none; }
+        .val-buff { color: #15803d; font-weight: 600; }
+        .val-nerf { color: #b91c1c; font-weight: 600; }
 
         /* 입력 그룹 */
         .input-group { margin-bottom: 18px; }
@@ -103,7 +107,7 @@
         .final-score { font-size: 2.8em; font-weight: 800; color: #fbbf24; display: block; }
 
         /* 하단 링크 */
-        .footer-link { margin-top: 20px; text-align: center; }
+        .footer-link { margin-top: 20px; text-align: center; padding-bottom: 20px; }
         .footer-link a { 
             text-decoration: none; 
             color: #64748b; 
@@ -112,6 +116,7 @@
             border-radius: 20px;
             background: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: inline-block;
         }
     </style>
 </head>
@@ -128,6 +133,7 @@
         <p id="searchMsg" style="margin: 10px 0 0 0; font-size: 0.8em; text-align: center; font-weight: 600;"></p>
 
         <div id="detailArea" class="details-box">
+            <span class="details-title">🔍 상세 데이터 내역</span>
             <div id="detailContent"></div>
         </div>
     </div>
@@ -152,12 +158,12 @@
     </div>
 
     <div class="input-group">
-        <label style="color:#15803d;">총 버프(+)</label> 
+        <label style="color:#15803d;">총 버프(+) - 자동입력 후 수정 가능</label> 
         <input type="number" id="totalBuff" value="0" oninput="calc()" style="background:#f0fdf4; border-color:#bbf7d0;">
     </div>
 
     <div class="input-group">
-        <label style="color:#b91c1c;">총 너프(-)</label> 
+        <label style="color:#b91c1c;">총 너프(-) - 자동입력 후 수정 가능</label> 
         <input type="number" id="totalNerf" value="0" oninput="calc()" style="background:#fef2f2; border-color:#fecaca;">
     </div>
 
@@ -169,13 +175,12 @@
 </div>
 
 <div class="footer-link">
-    <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 공식 카페 바로가기</a>
+    <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 바로가기</a>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec"; 
 
-    // 가중치 설정
     const W_VISIT = 1/70;
     const W_POST = 1/30;
     const W_COMMENT = 1/350;
@@ -187,7 +192,7 @@
         const detailContent = document.getElementById('detailContent');
 
         if(!nick) { alert("닉네임을 입력하세요."); return; }
-        msg.innerText = "데이터를 불러오는 중...";
+        msg.innerText = "데이터 로딩 중...";
         msg.style.color = "#64748b";
 
         fetch(SCRIPT_URL + "?nickname=" + encodeURIComponent(nick))
@@ -198,11 +203,19 @@
                     msg.style.color = "#2563eb";
 
                     const d = data.details;
+                    // 항목별 한 줄씩 출력되도록 수정
                     detailContent.innerHTML = `
-                        <div class="details-row"><span>보존/신인/군대:</span> <b>${d.preservation}/${d.rookie}/${d.army}</b></div>
-                        <div class="details-row"><span>국대/교육(승/우):</span> <b>${d.national}/${d.eduWin}/${d.eduMvp}</b></div>
-                        <div class="details-row"><span>기타 버프:</span> <b>${d.buffEtc}</b></div>
-                        <div class="details-row" style="color:#b91c1c;"><span>은퇴/노화/기타너프:</span> <b>${d.retire}/${d.aging}/${d.nerfEtc}</b></div>
+                        <div class="details-row"><span>보존 버프</span> <span class="val-buff">+${d.preservation}</span></div>
+                        <div class="details-row"><span>신인 버프</span> <span class="val-buff">+${d.rookie}</span></div>
+                        <div class="details-row"><span>군대 버프</span> <span class="val-buff">+${d.army}</span></div>
+                        <div class="details-row"><span>국대 버프</span> <span class="val-buff">+${d.national}</span></div>
+                        <div class="details-row"><span>교육리그(승리)</span> <span class="val-buff">+${d.eduWin}</span></div>
+                        <div class="details-row"><span>교육리그(우수)</span> <span class="val-buff">+${d.eduMvp}</span></div>
+                        <div class="details-row"><span>기타 버프</span> <span class="val-buff">+${d.buffEtc}</span></div>
+                        <div style="border-top: 1px dashed #cbd5e1; margin: 8px 0;"></div>
+                        <div class="details-row"><span>은퇴 너프</span> <span class="val-nerf">-${d.retire}</span></div>
+                        <div class="details-row"><span>노화 너프</span> <span class="val-nerf">-${d.aging}</span></div>
+                        <div class="details-row"><span>기타 너프</span> <span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     detailArea.style.display = "block";
 
@@ -214,7 +227,7 @@
                     msg.style.color = "#ef4444";
                 }
             })
-            .catch(() => { msg.innerText = "네트워크 오류가 발생했습니다."; });
+            .catch(() => { msg.innerText = "오류가 발생했습니다."; });
     }
 
     function calc() {
