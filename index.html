@@ -96,12 +96,12 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoP3mPA_es22V4u9PvPU224BYZPVuExe6r8Dbv8ANaR4eqOJ6HZgWpK7X5qd7Bq3sM1w/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeZdfK9a1p0lLP6SLvrc3nXWUE1AvaoTTwhJcJvZ-TxJgI1f36rFyRHt54-XzT5nwA4g/exec"; 
 
     // 가중치 (리그 규칙에 맞게 수정)
-    const W_VISIT = 70;
-    const W_POST = 30;
-    const W_COMMENT = 350;
+    const W_VISIT = 1/70;
+    const W_POST = 1/30;
+    const W_COMMENT = 1/350;
 
     function searchNickname() {
         const nick = document.getElementById('nicknameInput').value;
@@ -165,7 +165,7 @@
         const final = pure + buff - nerf + year; 
 
         document.getElementById('pureStats').innerText = pure.toLocaleString();
-        document.getElementById('finalStats').innerText = final.toLocaleString();
+        document.getElementById('finalStats').innerText = Math.round(final).toLocaleString();
     }
 </script>
 
