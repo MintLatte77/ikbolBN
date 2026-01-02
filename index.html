@@ -20,9 +20,9 @@
         .buff-text { color: green; }
         .nerf-text { color: red; }
         
-        .input-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .input-group label { font-weight: bold; width: 120px; }
-        .input-group input, .input-group select { padding: 6px; width: 150px; text-align: right; }
+        .input-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+        .input-group label { font-weight: bold; width: 180px; flex-shrink: 0; word-break: keep-all; font-size: 0.95em;}
+        .input-group input, .input-group select { padding: 8px; width: 100%; max-width: 180px; text-align: right; border: 1px solid #ccc; border-radius: 4px;}
         
         .result-box { margin-top: 20px; padding: 20px; background-color: #333; color: white; border-radius: 8px; text-align: center; }
         .final-score { font-size: 2em; font-weight: bold; color: #ffeb3b; display: block; margin-top: 5px; }
@@ -72,10 +72,6 @@
             <option value="30">1년차 (+30)</option>
             <option value="20">2년차 (+20)</option>
             <option value="10">3년차 (+10)</option>
-            `<option value="-10">16~17년차 (-10)</option>`
-            `<option value="-30">18~20년차 (-30)</option>`
-            `<option value="-50">21~23년차 (-50)</option>`
-            `<option value="-60">24년차 이상 (-60)</option>`
         </select>
     </div>
 
