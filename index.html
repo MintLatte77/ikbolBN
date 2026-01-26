@@ -205,7 +205,7 @@
     const W_POST = 1/30;
     const W_COMMENT = 1/350;
 
-    // 소수점 셋째 자리에서 반올림하는 헬퍼 함수
+    // 반올림 함수
     function roundToTwo(num) {
         return +(Math.round(num + "e+2") + "e-2");
     }
@@ -269,7 +269,7 @@
         const pure = (v * W_VISIT) + (p * W_POST) + (c * W_COMMENT);
         const final = pure + buff - nerf + year; 
 
-        // 결과값을 소수점 둘째 자리까지 표시 (셋째 자리에서 반올림)
+        // 결과값을 소수점 둘째 자리까지 표시
         document.getElementById('pureStats').innerText = roundToTwo(pure).toLocaleString();
         document.getElementById('finalStats').innerText = roundToTwo(final).toLocaleString();
     }
