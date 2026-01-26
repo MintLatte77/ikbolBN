@@ -6,46 +6,35 @@
     <title>IKBOL 스탯 계산기 v3</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <style>
+        /* CSS 영역은 기존과 동일하므로 유지합니다 */
         * { box-sizing: border-box; font-family: "Pretendard Variable", sans-serif; }
         body { margin: 0; padding: 10px; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h2 { text-align: center; color: #000; margin-bottom: 25px; font-weight: 800; }
-
-        /* 검색 섹션 */
         .search-box { background-color: #eff6ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #dbeafe; }
         .search-row { display: flex; gap: 8px; }
         .search-row input { flex: 1; padding: 12px; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 16px; }
         .search-row button { padding: 0 20px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        /* 상세 리스트 */
         .details-box { display: none; margin-top: 15px; background: #fff; padding: 12px; border-radius: 8px; font-size: 0.85em; border: 1px solid #e2e8f0; }
         .details-title { font-weight: 700; color: #1e3a8a; margin-bottom: 8px; display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
         .details-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #f8fafc; }
         .val-buff { color: #15803d; font-weight: 600; }
         .val-nerf { color: #b91c1c; font-weight: 600; }
-
-        /* 나이 설정 */
         .control-group { background-color: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
         .control-header { display: flex; justify-content: space-between; align-items: center; }
         .age-val { color: #2563eb; font-weight: 800; font-size: 1.1em; }
         input[type="range"] { width: 100%; margin: 10px 0; cursor: pointer; }
-
-        /* 입력 폼 */
         .input-group { margin-bottom: 18px; }
         .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4b5563; margin-bottom: 6px; }
         .input-row { display: flex; gap: 8px; width: 100%; }
         .input-row input { flex: 1; min-width: 0; text-align: center; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
-
         .total-input { width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 400; text-align: left; border: 1px solid; }
         .bg-buff { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
         .bg-nerf { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
-
-        /* 결과 창 */
         .result-box { margin-top: 25px; padding: 25px; background: #1e293b; color: white; border-radius: 16px; text-align: center; }
         .pure-text { font-size: 0.9em; opacity: 0.85; margin-bottom: 5px; }
         .final-score { font-size: 2.8em; font-weight: 800; color: #fbbf24; display: block; }
         .age-tag { display: inline-block; margin-top: 10px; font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
-
         .footer { margin-top: 20px; text-align: center; font-size: 0.75rem; color: #94a3b8; padding-bottom: 20px; }
     </style>
 </head>
@@ -110,16 +99,14 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec";
     const WV=1/70, WP=1/30, WC=1/350;
 
-    // 초기값 0으로 확실히 세팅
+    // 시트에서 불러온 값 중 나이에 영향받지 않는 순수 고정치
     let baseBuff = 0;
     let baseNerf = 0;
 
+    // 슬라이더 조작 시 실행되는 함수
     function updateAgeLabel() {
-        const ageSlider = document.getElementById('ageSlider');
-        const age = Number(ageSlider.value);
+        const age = Number(document.getElementById('ageSlider').value);
         const isArmy = document.getElementById('armyCheck').checked;
-        
-        // 화면 글자 즉시 변경
         document.getElementById('ageLab').innerText = age;
 
         // 1. 현재 슬라이더 기준 신인 버프 계산
@@ -133,11 +120,11 @@
             if (i <= 36) an += 10; else if (i <= 39) an += 30; else if (i <= 42) an += 50; else an += 60;
         }
 
-        // 3. 총합 입력칸 실시간 반영 (고정값 + 슬라이더값)
+        // 3. 고정치 + 슬라이더치를 합산하여 입력창에 실시간 주입
         document.getElementById('totalBuff').value = baseBuff + rb;
         document.getElementById('totalNerf').value = baseNerf + an;
 
-        // 하단 태그 반영
+        // 하단 태그 업데이트
         const tag = document.getElementById('ageTag');
         if (rb > 0) { tag.style.display = "inline-block"; tag.innerText = `신인 버프 +${rb}`; }
         else if (an > 0) { tag.style.display = "inline-block"; tag.innerText = `노화 너프 -${an}`; }
@@ -146,6 +133,7 @@
         calc();
     }
 
+    // 데이터를 가져오는 함수
     function fetchData() {
         const nick = document.getElementById('nickInput').value;
         if(!nick) return;
@@ -157,19 +145,24 @@
                 if(data.result === "success") {
                     document.getElementById('statusMsg').innerText = `✅ '${data.nickname}'님 데이터 적용 완료`;
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
+                    
                     const d = data.details;
 
-                    // [핵심] 나이 변동 수치를 제외한 순수 고정값 합산
-                    baseBuff = Number(d.preservation) + Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
+                    // [수정 핵심] 시트에서 age와 army 데이터를 확실하게 추출하여 적용
+                    const sheetAge = Number(d.age) || 20;
+                    const sheetArmy = Number(d.army) || 0;
+
+                    // 1. 나이에 따라 변하는 값(신인/노화)을 뺀 순수 고정 버프 합산
+                    baseBuff = Number(d.preservation) + Number(d.national) + 
+                               Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc) + sheetArmy;
                     baseNerf = Number(d.retire) + Number(d.nerfEtc);
-                    // 군대 버프는 고정값에 포함 (군필 여부 체크박스는 계산에만 관여)
-                    baseBuff += Number(d.army);
 
-                    // [중요] 슬라이더 위치와 체크박스 상태를 데이터에 맞게 강제 강제 변경
-                    document.getElementById('ageSlider').value = Number(d.age) || 20;
-                    document.getElementById('armyCheck').checked = (Number(d.army) > 0);
+                    // 2. 슬라이더 위치와 체크박스를 시트 값으로 강제 이동
+                    document.getElementById('ageSlider').value = sheetAge;
+                    document.getElementById('armyCheck').checked = (sheetArmy > 0);
+                    document.getElementById('ageLab').innerText = sheetAge;
 
-                    // 리스트 출력
+                    // 리스트 상세 내용 출력
                     document.getElementById('detailContent').innerHTML = `
                         <div class="details-row"><span>보존 버프</span><span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
@@ -184,22 +177,25 @@
                         <div class="details-row"><span>기타 너프</span><span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     document.getElementById('detailArea').style.display = "block";
-                    
-                    // 모든 값이 세팅된 후 계산기 새로고침 호출
+
+                    // [수정 핵심] 모든 설정이 끝난 뒤 계산 함수를 호출해 화면 갱신
                     updateAgeLabel(); 
                 } else {
                     document.getElementById('statusMsg').innerText = "❌ 정보를 찾을 수 없습니다.";
                 }
             })
             .catch(err => {
-                document.getElementById('statusMsg').innerText = "❌ 연결 오류가 발생했습니다.";
+                document.getElementById('statusMsg').innerText = "❌ 조회 오류가 발생했습니다.";
+                console.error(err);
             });
     }
 
+    // 최종 스탯 합산 함수
     function calc() {
         const v = Number(document.getElementById('vIn').value) || 0;
         const p = Number(document.getElementById('pIn').value) || 0;
         const c = Number(document.getElementById('cIn').value) || 0;
+        
         const buff = Number(document.getElementById('totalBuff').value) || 0;
         const nerf = Number(document.getElementById('totalNerf').value) || 0;
 
