@@ -6,7 +6,6 @@
     <title>IKBOL 스탯 계산기 v3</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <style>
-        /* CSS 영역은 기존과 동일하므로 유지합니다 */
         * { box-sizing: border-box; font-family: "Pretendard Variable", sans-serif; }
         body { margin: 0; padding: 10px; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
@@ -99,32 +98,26 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec";
     const WV=1/70, WP=1/30, WC=1/350;
 
-    // 시트에서 불러온 값 중 나이에 영향받지 않는 순수 고정치
     let baseBuff = 0;
     let baseNerf = 0;
 
-    // 슬라이더 조작 시 실행되는 함수
     function updateAgeLabel() {
         const age = Number(document.getElementById('ageSlider').value);
         const isArmy = document.getElementById('armyCheck').checked;
         document.getElementById('ageLab').innerText = age;
 
-        // 1. 현재 슬라이더 기준 신인 버프 계산
         let rb = 0;
         const rAge = isArmy ? age - 1 : age;
         if(rAge === 20) rb = 30; else if(rAge === 21) rb = 20; else if(rAge === 22) rb = 10;
 
-        // 2. 현재 슬라이더 기준 노화 너프 계산
         let an = 0;
         for (let i = 35; i <= age; i++) {
             if (i <= 36) an += 10; else if (i <= 39) an += 30; else if (i <= 42) an += 50; else an += 60;
         }
 
-        // 3. 고정치 + 슬라이더치를 합산하여 입력창에 실시간 주입
         document.getElementById('totalBuff').value = baseBuff + rb;
         document.getElementById('totalNerf').value = baseNerf + an;
 
-        // 하단 태그 업데이트
         const tag = document.getElementById('ageTag');
         if (rb > 0) { tag.style.display = "inline-block"; tag.innerText = `신인 버프 +${rb}`; }
         else if (an > 0) { tag.style.display = "inline-block"; tag.innerText = `노화 너프 -${an}`; }
@@ -133,7 +126,6 @@
         calc();
     }
 
-    // 데이터를 가져오는 함수
     function fetchData() {
         const nick = document.getElementById('nickInput').value;
         if(!nick) return;
@@ -145,24 +137,27 @@
                 if(data.result === "success") {
                     document.getElementById('statusMsg').innerText = `✅ '${data.nickname}'님 데이터 적용 완료`;
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
-                    
                     const d = data.details;
 
-                    // [수정 핵심] 시트에서 age와 army 데이터를 확실하게 추출하여 적용
                     const sheetAge = Number(d.age) || 20;
+                    const sheetRookie = Number(d.rookie) || 0;
                     const sheetArmy = Number(d.army) || 0;
 
-                    // 1. 나이에 따라 변하는 값(신인/노화)을 뺀 순수 고정 버프 합산
+                    // [핵심 로직] 조회 시 자동 군필 판정
+                    // 21세인데 30이거나, 22세인데 20이거나, 23세인데 10이면 "군필 연장"으로 간주
+                    let autoArmyCheck = (sheetArmy > 0);
+                    if (sheetAge === 21 && sheetRookie === 30) autoArmyCheck = true;
+                    if (sheetAge === 22 && sheetRookie === 20) autoArmyCheck = true;
+                    if (sheetAge === 23 && sheetRookie === 10) autoArmyCheck = true;
+
                     baseBuff = Number(d.preservation) + Number(d.national) + 
                                Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc) + sheetArmy;
                     baseNerf = Number(d.retire) + Number(d.nerfEtc);
 
-                    // 2. 슬라이더 위치와 체크박스를 시트 값으로 강제 이동
                     document.getElementById('ageSlider').value = sheetAge;
-                    document.getElementById('armyCheck').checked = (sheetArmy > 0);
+                    document.getElementById('armyCheck').checked = autoArmyCheck;
                     document.getElementById('ageLab').innerText = sheetAge;
 
-                    // 리스트 상세 내용 출력
                     document.getElementById('detailContent').innerHTML = `
                         <div class="details-row"><span>보존 버프</span><span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
@@ -177,28 +172,20 @@
                         <div class="details-row"><span>기타 너프</span><span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     document.getElementById('detailArea').style.display = "block";
-
-                    // [수정 핵심] 모든 설정이 끝난 뒤 계산 함수를 호출해 화면 갱신
+                    
                     updateAgeLabel(); 
                 } else {
                     document.getElementById('statusMsg').innerText = "❌ 정보를 찾을 수 없습니다.";
                 }
-            })
-            .catch(err => {
-                document.getElementById('statusMsg').innerText = "❌ 조회 오류가 발생했습니다.";
-                console.error(err);
             });
     }
 
-    // 최종 스탯 합산 함수
     function calc() {
         const v = Number(document.getElementById('vIn').value) || 0;
         const p = Number(document.getElementById('pIn').value) || 0;
         const c = Number(document.getElementById('cIn').value) || 0;
-        
         const buff = Number(document.getElementById('totalBuff').value) || 0;
         const nerf = Number(document.getElementById('totalNerf').value) || 0;
-
         const act = (v * WV) + (p * WP) + (c * WC);
         document.getElementById('pureStats').innerText = act.toFixed(2);
         document.getElementById('finalStats').innerText = (act + buff - nerf).toFixed(2);
