@@ -155,16 +155,23 @@
                     document.getElementById('statusMsg').innerText = `✅ '${data.nickname}'님 데이터 적용 완료`;
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
                     const d = data.details;
-
-                    // [수정 포인트] 신인버프/노화너프를 제외한 "고정 버프/너프"만 추출해서 보관
-                    baseBuff = Number(d.preservation) + Number(d.army) + Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
+                
+                    // 1. 모든 수치를 Number로 강제 변환 (문자열 방지)
+                    baseBuff = Number(d.preservation) + Number(d.army) + Number(d.national) + 
+                               Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
                     baseNerf = Number(d.retire) + Number(d.nerfEtc);
-
-                    // [수정 포인트] 시트의 나이 및 군필 여부 자동 반영
-                    document.getElementById('ageSlider').value = d.age || 20;
-                    document.getElementById('armyCheck').checked = (Number(d.army) > 0);
-
-                    // 리스트 렌더링
+                
+                    // 2. 나이 슬라이더와 군필 체크박스 직접 조작
+                    const targetAge = Number(d.age) || 20;
+                    const isArmy = Number(d.army) > 0;
+                    
+                    document.getElementById('ageSlider').value = targetAge;
+                    document.getElementById('armyCheck').checked = isArmy;
+                
+                    // 3. UI 텍스트 강제 갱신 (슬라이더만 옮기는 게 아니라 글자도 직접 바꿈)
+                    document.getElementById('ageLab').innerText = targetAge;
+                
+                    // 4. 리스트 출력 (이 부분은 기존과 동일)
                     document.getElementById('detailContent').innerHTML = `
                         <div class="details-row"><span>보존 버프</span><span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
@@ -179,8 +186,8 @@
                         <div class="details-row"><span>기타 너프</span><span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     document.getElementById('detailArea').style.display = "block";
-                    
-                    // [수정 포인트] 데이터 로드 즉시 나이 계산기를 호출하여 총합 칸을 동기화
+                
+                    // 5. 마지막으로 모든 계산기 로직 통합 실행
                     updateAgeLabel(); 
                 } else {
                     document.getElementById('statusMsg').innerText = "❌ 정보를 찾을 수 없습니다.";
