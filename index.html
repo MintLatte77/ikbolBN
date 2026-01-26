@@ -30,13 +30,12 @@
         .age-val { color: #2563eb; font-weight: 800; font-size: 1.1em; }
         input[type="range"] { width: 100%; margin: 10px 0; cursor: pointer; }
 
-        /* 입력 폼 (댓글창 삐져나옴 방지) */
+        /* 입력 폼 */
         .input-group { margin-bottom: 18px; }
         .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4b5563; margin-bottom: 6px; }
         .input-row { display: flex; gap: 8px; width: 100%; }
         .input-row input { flex: 1; min-width: 0; text-align: center; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
 
-        /* 총합 입력칸 (좌측 정렬, 노볼드, 크기 축소) */
         .total-input { width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 400; text-align: left; border: 1px solid; }
         .bg-buff { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
         .bg-nerf { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
@@ -111,21 +110,31 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec";
     const WV=1/70, WP=1/30, WC=1/350;
 
+    // 시트에서 가져온 값 중 "나이에 영향을 받지 않는" 고정 수치 보관
+    let baseBuff = 0;
+    let baseNerf = 0;
+
     function updateAgeLabel() {
         const age = Number(document.getElementById('ageSlider').value);
         const isArmy = document.getElementById('armyCheck').checked;
         document.getElementById('ageLab').innerText = age;
 
-        // 최종 스탯 하단 태그 실시간 반영
+        // 1. 현재 슬라이더 기준 신인 버프 계산
         let rb = 0;
         const rAge = isArmy ? age - 1 : age;
         if(rAge === 20) rb = 30; else if(rAge === 21) rb = 20; else if(rAge === 22) rb = 10;
 
+        // 2. 현재 슬라이더 기준 노화 너프 계산
         let an = 0;
         for (let i = 35; i <= age; i++) {
             if (i <= 36) an += 10; else if (i <= 39) an += 30; else if (i <= 42) an += 50; else an += 60;
         }
 
+        // 3. [수정 포인트] 총합 입력칸의 숫자를 직접 갱신 (고정수치 + 현재 나이수치)
+        document.getElementById('totalBuff').value = baseBuff + rb;
+        document.getElementById('totalNerf').value = baseNerf + an;
+
+        // 하단 태그 실시간 반영
         const tag = document.getElementById('ageTag');
         if (rb > 0) { tag.style.display = "inline-block"; tag.innerText = `신인 버프 +${rb}`; }
         else if (an > 0) { tag.style.display = "inline-block"; tag.innerText = `노화 너프 -${an}`; }
@@ -147,14 +156,15 @@
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
                     const d = data.details;
 
-                    // 나이 및 군필 자동 체크
-                    document.getElementById('ageSlider').value = d.age || 20;
-                    window.sheetRookie = Number(d.rookie) || 0;
-                    window.sheetAging = Number(d.aging) || 0;
-                    document.getElementById('armyCheck').checked = (Number(d.army) > 0);
-                    updateAgeLabel();
+                    // [수정 포인트] 신인버프/노화너프를 제외한 "고정 버프/너프"만 추출해서 보관
+                    baseBuff = Number(d.preservation) + Number(d.army) + Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
+                    baseNerf = Number(d.retire) + Number(d.nerfEtc);
 
-                    // 리스트 고정 (시트 수치 그대로)
+                    // [수정 포인트] 시트의 나이 및 군필 여부 자동 반영
+                    document.getElementById('ageSlider').value = d.age || 20;
+                    document.getElementById('armyCheck').checked = (Number(d.army) > 0);
+
+                    // 리스트 렌더링
                     document.getElementById('detailContent').innerHTML = `
                         <div class="details-row"><span>보존 버프</span><span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
@@ -169,9 +179,9 @@
                         <div class="details-row"><span>기타 너프</span><span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     document.getElementById('detailArea').style.display = "block";
-                    document.getElementById('totalBuff').value = data.totalBuff;
-                    document.getElementById('totalNerf').value = data.totalNerf;
-                    calc();
+                    
+                    // [수정 포인트] 데이터 로드 즉시 나이 계산기를 호출하여 총합 칸을 동기화
+                    updateAgeLabel(); 
                 } else {
                     document.getElementById('statusMsg').innerText = "❌ 정보를 찾을 수 없습니다.";
                 }
@@ -179,35 +189,16 @@
     }
 
     function calc() {
-    const v = Number(document.getElementById('vIn').value) || 0;
-    const p = Number(document.getElementById('pIn').value) || 0;
-    const c = Number(document.getElementById('cIn').value) || 0;
-    
-    // 입력창에 있는 값 (시트 조회 시 들어온 값)
-    let buff = Number(document.getElementById('totalBuff').value) || 0;
-    let nerf = Number(document.getElementById('totalNerf').value) || 0;
+        const v = Number(document.getElementById('vIn').value) || 0;
+        const p = Number(document.getElementById('pIn').value) || 0;
+        const c = Number(document.getElementById('cIn').value) || 0;
+        
+        const buff = Number(document.getElementById('totalBuff').value) || 0;
+        const nerf = Number(document.getElementById('totalNerf').value) || 0;
 
-    // 현재 슬라이더 기준 신인/노화 계산
-    const age = Number(document.getElementById('ageSlider').value);
-    const isArmy = document.getElementById('armyCheck').checked;
-    
-    let currentRb = 0;
-    const rAge = isArmy ? age - 1 : age;
-    if(rAge === 20) currentRb = 30; else if(rAge === 21) currentRb = 20; else if(rAge === 22) currentRb = 10;
-
-    let currentAn = 0;
-    for (let i = 35; i <= age; i++) {
-        if (i <= 36) currentAn += 10; else if (i <= 39) currentAn += 30; else if (i <= 42) currentAn += 50; else currentAn += 60;
-    }
-
-    // [중요] 시트 데이터(d.rookie, d.aging)와 현재 슬라이더 값의 차이를 점수에 반영
-    const rookieDiff = currentRb - (window.sheetRookie || 0);
-    const agingDiff = currentAn - (window.sheetAging || 0);
-
-    const act = (v * WV) + (p * WP) + (c * WC);
-    document.getElementById('pureStats').innerText = act.toFixed(2);
-    // 최종 계산 시 차이값 적용
-    document.getElementById('finalStats').innerText = (act + buff + rookieDiff - (nerf + agingDiff)).toFixed(2);
+        const act = (v * WV) + (p * WP) + (c * WC);
+        document.getElementById('pureStats').innerText = act.toFixed(2);
+        document.getElementById('finalStats').innerText = (act + buff - nerf).toFixed(2);
     }
 </script>
 </body>
