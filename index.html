@@ -110,13 +110,16 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9OUof1STrJMijMc-YcGrvpopnuYJESlMEGXbAmK-UzyVVg_naV4KA06GsE9goVqdy-A/exec";
     const WV=1/70, WP=1/30, WC=1/350;
 
-    // 시트에서 가져온 값 중 "나이에 영향을 받지 않는" 고정 수치 보관
+    // 초기값 0으로 확실히 세팅
     let baseBuff = 0;
     let baseNerf = 0;
 
     function updateAgeLabel() {
-        const age = Number(document.getElementById('ageSlider').value);
+        const ageSlider = document.getElementById('ageSlider');
+        const age = Number(ageSlider.value);
         const isArmy = document.getElementById('armyCheck').checked;
+        
+        // 화면 글자 즉시 변경
         document.getElementById('ageLab').innerText = age;
 
         // 1. 현재 슬라이더 기준 신인 버프 계산
@@ -130,11 +133,11 @@
             if (i <= 36) an += 10; else if (i <= 39) an += 30; else if (i <= 42) an += 50; else an += 60;
         }
 
-        // 3. [수정 포인트] 총합 입력칸의 숫자를 직접 갱신 (고정수치 + 현재 나이수치)
+        // 3. 총합 입력칸 실시간 반영 (고정값 + 슬라이더값)
         document.getElementById('totalBuff').value = baseBuff + rb;
         document.getElementById('totalNerf').value = baseNerf + an;
 
-        // 하단 태그 실시간 반영
+        // 하단 태그 반영
         const tag = document.getElementById('ageTag');
         if (rb > 0) { tag.style.display = "inline-block"; tag.innerText = `신인 버프 +${rb}`; }
         else if (an > 0) { tag.style.display = "inline-block"; tag.innerText = `노화 너프 -${an}`; }
@@ -155,23 +158,18 @@
                     document.getElementById('statusMsg').innerText = `✅ '${data.nickname}'님 데이터 적용 완료`;
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
                     const d = data.details;
-                
-                    // 1. 모든 수치를 Number로 강제 변환 (문자열 방지)
-                    baseBuff = Number(d.preservation) + Number(d.army) + Number(d.national) + 
-                               Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
+
+                    // [핵심] 나이 변동 수치를 제외한 순수 고정값 합산
+                    baseBuff = Number(d.preservation) + Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
                     baseNerf = Number(d.retire) + Number(d.nerfEtc);
-                
-                    // 2. 나이 슬라이더와 군필 체크박스 직접 조작
-                    const targetAge = Number(d.age) || 20;
-                    const isArmy = Number(d.army) > 0;
-                    
-                    document.getElementById('ageSlider').value = targetAge;
-                    document.getElementById('armyCheck').checked = isArmy;
-                
-                    // 3. UI 텍스트 강제 갱신 (슬라이더만 옮기는 게 아니라 글자도 직접 바꿈)
-                    document.getElementById('ageLab').innerText = targetAge;
-                
-                    // 4. 리스트 출력 (이 부분은 기존과 동일)
+                    // 군대 버프는 고정값에 포함 (군필 여부 체크박스는 계산에만 관여)
+                    baseBuff += Number(d.army);
+
+                    // [중요] 슬라이더 위치와 체크박스 상태를 데이터에 맞게 강제 강제 변경
+                    document.getElementById('ageSlider').value = Number(d.age) || 20;
+                    document.getElementById('armyCheck').checked = (Number(d.army) > 0);
+
+                    // 리스트 출력
                     document.getElementById('detailContent').innerHTML = `
                         <div class="details-row"><span>보존 버프</span><span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
@@ -186,12 +184,15 @@
                         <div class="details-row"><span>기타 너프</span><span class="val-nerf">-${d.nerfEtc}</span></div>
                     `;
                     document.getElementById('detailArea').style.display = "block";
-                
-                    // 5. 마지막으로 모든 계산기 로직 통합 실행
+                    
+                    // 모든 값이 세팅된 후 계산기 새로고침 호출
                     updateAgeLabel(); 
                 } else {
                     document.getElementById('statusMsg').innerText = "❌ 정보를 찾을 수 없습니다.";
                 }
+            })
+            .catch(err => {
+                document.getElementById('statusMsg').innerText = "❌ 연결 오류가 발생했습니다.";
             });
     }
 
@@ -199,7 +200,6 @@
         const v = Number(document.getElementById('vIn').value) || 0;
         const p = Number(document.getElementById('pIn').value) || 0;
         const c = Number(document.getElementById('cIn').value) || 0;
-        
         const buff = Number(document.getElementById('totalBuff').value) || 0;
         const nerf = Number(document.getElementById('totalNerf').value) || 0;
 
