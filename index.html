@@ -149,6 +149,8 @@
 
                     // 나이 및 군필 자동 체크
                     document.getElementById('ageSlider').value = d.age || 20;
+                    window.sheetRookie = Number(d.rookie) || 0;
+                    window.sheetAging = Number(d.aging) || 0;
                     document.getElementById('armyCheck').checked = (Number(d.army) > 0);
                     updateAgeLabel();
 
@@ -177,14 +179,35 @@
     }
 
     function calc() {
-        const v = Number(document.getElementById('vIn').value) || 0;
-        const p = Number(document.getElementById('pIn').value) || 0;
-        const c = Number(document.getElementById('cIn').value) || 0;
-        const buff = Number(document.getElementById('totalBuff').value) || 0;
-        const nerf = Number(document.getElementById('totalNerf').value) || 0;
-        const act = (v * WV) + (p * WP) + (c * WC);
-        document.getElementById('pureStats').innerText = act.toFixed(2);
-        document.getElementById('finalStats').innerText = (act + buff - nerf).toFixed(2);
+    const v = Number(document.getElementById('vIn').value) || 0;
+    const p = Number(document.getElementById('pIn').value) || 0;
+    const c = Number(document.getElementById('cIn').value) || 0;
+    
+    // 입력창에 있는 값 (시트 조회 시 들어온 값)
+    let buff = Number(document.getElementById('totalBuff').value) || 0;
+    let nerf = Number(document.getElementById('totalNerf').value) || 0;
+
+    // 현재 슬라이더 기준 신인/노화 계산
+    const age = Number(document.getElementById('ageSlider').value);
+    const isArmy = document.getElementById('armyCheck').checked;
+    
+    let currentRb = 0;
+    const rAge = isArmy ? age - 1 : age;
+    if(rAge === 20) currentRb = 30; else if(rAge === 21) currentRb = 20; else if(rAge === 22) currentRb = 10;
+
+    let currentAn = 0;
+    for (let i = 35; i <= age; i++) {
+        if (i <= 36) currentAn += 10; else if (i <= 39) currentAn += 30; else if (i <= 42) currentAn += 50; else currentAn += 60;
+    }
+
+    // [중요] 시트 데이터(d.rookie, d.aging)와 현재 슬라이더 값의 차이를 점수에 반영
+    const rookieDiff = currentRb - (window.sheetRookie || 0);
+    const agingDiff = currentAn - (window.sheetAging || 0);
+
+    const act = (v * WV) + (p * WP) + (c * WC);
+    document.getElementById('pureStats').innerText = act.toFixed(2);
+    // 최종 계산 시 차이값 적용
+    document.getElementById('finalStats').innerText = (act + buff + rookieDiff - (nerf + agingDiff)).toFixed(2);
     }
 </script>
 </body>
