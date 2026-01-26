@@ -139,6 +139,10 @@
                     document.getElementById('dynTitle').innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
                     const d = data.details;
 
+                    console.log("시트 원본 데이터:", data); // 전체 응답 확인
+                    console.log("세부 디테일(d):", d);     // 세부 수치 확인
+                    console.log("가져온 나이:", d.age, "가져온 신인버프:", d.rookie);
+
                     const sheetAge = Number(d.age) || 20;
                     const sheetRookie = Number(d.rookie) || 0;
                     const sheetArmy = Number(d.army) || 0;
