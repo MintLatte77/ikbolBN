@@ -30,7 +30,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* [2] 검색 및 상태 메시지 */
+        /* [2] 검색 영역 */
         h2 {
             text-align: center;
             margin-bottom: 20px;
@@ -69,7 +69,7 @@
             cursor: pointer;
         }
 
-        /* [3] 상세 데이터 리스트 (1행 1항목) */
+        /* [3] 상세 데이터 리스트 (1행 1항목 - 간략화 없음) */
         .detail-display {
             display: none;
             margin-top: 15px;
@@ -80,10 +80,21 @@
             font-size: 14px;
         }
 
+        .detail-category {
+            font-weight: 800;
+            color: #475569;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            display: block;
+            border-left: 3px solid #cbd5e1;
+            padding-left: 8px;
+        }
+
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #f0f0f0;
         }
 
@@ -101,19 +112,8 @@
             font-weight: bold;
         }
 
-        .detail-category {
-            font-weight: 800;
-            color: #475569;
-            margin-top: 12px;
-            margin-bottom: 5px;
-            font-size: 13px;
-            display: block;
-            border-left: 3px solid #cbd5e1;
-            padding-left: 8px;
-        }
-
-        /* [4] 나이 설정 및 군필 체크 */
-        .age-section {
+        /* [4] 나이 및 군필 조작 */
+        .control-section {
             background: #fafafa;
             border: 1px solid #eeeeee;
             border-radius: 10px;
@@ -121,7 +121,7 @@
             margin-bottom: 20px;
         }
 
-        .age-header {
+        .control-header {
             display: flex;
             justify-content: space-between;
             font-weight: bold;
@@ -144,7 +144,7 @@
             cursor: pointer;
         }
 
-        /* [5] 입력창 스타일 */
+        /* [5] 활동 스탯 입력 */
         .input-label {
             display: block;
             font-size: 13px;
@@ -156,7 +156,7 @@
         .input-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-row input {
@@ -168,32 +168,33 @@
             font-size: 16px;
         }
 
-        /* [6] 요약 바 */
-        .summary-bar {
+        /* [6] 수동 수정 칸 (총 버프/너프) */
+        .edit-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .summary-box {
-            flex: 1;
-            padding: 10px;
+        .edit-row input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             text-align: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
         }
 
-        .bg-green {
-            background: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
+        .input-buff {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0 !important;
         }
 
-        .bg-red {
-            background: #fef2f2;
+        .input-nerf {
+            background-color: #fef2f2;
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border-color: #fecaca !important;
         }
 
         /* [7] 최종 결과 패널 */
@@ -206,7 +207,7 @@
         }
 
         .pure-val {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.7;
             margin-bottom: 5px;
         }
@@ -221,14 +222,14 @@
 
         .info-tag {
             margin-top: 15px;
-            display: inline-block;
+            display: none;
             font-size: 12px;
             background: rgba(255, 255, 255, 0.15);
             padding: 4px 12px;
             border-radius: 20px;
         }
 
-        /* [8] 푸터 및 버전 정보 */
+        /* [8] 푸터 및 버전 */
         .footer {
             margin-top: 25px;
             text-align: center;
@@ -266,42 +267,43 @@
         <div id="statusMsg" style="text-align:center; margin-top:10px; font-size:13px; font-weight:bold;"></div>
         
         <div id="detailView" class="detail-display">
-            <div style="font-weight:bold; border-bottom:2px solid #f0f0f0; padding-bottom:8px; margin-bottom:5px;" id="viewName">선수 상세 정보</div>
+            <div style="font-weight:bold; border-bottom:2px solid #f0f0f0; padding-bottom:8px; margin-bottom:5px;" id="viewName">선수 상세 데이터</div>
             <div id="viewRows"></div>
         </div>
     </div>
 
-    <div class="age-section">
-        <div class="age-header">
+    <div class="control-section">
+        <div class="control-header">
             <span>나이 설정</span>
             <span class="txt-blue"><span id="ageLabel">20</span>세</span>
         </div>
         <input type="range" id="ageSlider" min="20" max="55" value="20" oninput="onAgeChange(this.value)">
         <label class="army-check-label">
-            <input type="checkbox" id="armyCheck" onchange="calculate()"> 군대
+            <input type="checkbox" id="armyCheck" onchange="calculate()"> 군필 여부 (21~23세 신인연장)
         </label>
     </div>
 
-    <label class="input-label">활동 스탯 입력 (방문 / 게시글 / 댓글)</label>
+    <label class="input-label">활동 데이터 입력 (방문 / 글 / 댓글)</label>
     <div class="input-row">
         <input type="number" id="vIn" placeholder="방문" oninput="calculate()">
         <input type="number" id="pIn" placeholder="글" oninput="calculate()">
         <input type="number" id="cIn" placeholder="댓글" oninput="calculate()">
     </div>
 
-    <div class="summary-bar">
-        <div class="summary-box bg-green">총 버프(+): <span id="sumB">0</span></div>
-        <div class="summary-box bg-red">총 너프(-): <span id="sumN">0</span></div>
+    <label class="input-label">총 버프 및 너프</label>
+    <div class="edit-row">
+        <input type="number" id="manualBuff" class="input-buff" placeholder="총 버프(+)" oninput="calculate()">
+        <input type="number" id="manualNerf" class="input-nerf" placeholder="총 너프(-)" oninput="calculate()">
     </div>
 
     <div class="result-panel">
-        <div class="pure-val">순수 활동 스탯: <span id="pureLabel">0.00</span></div>
+        <div class="pure-val">순수 스탯 : <span id="pureLabel">0.00</span></div>
         <span class="final-val" id="finalLabel">0.00</span>
-        <div class="info-tag" id="ageTag">나이 영향 없음</div>
+        <div class="info-tag" id="ageTag"></div>
     </div>
 
-    <input type="hidden" id="fBuff" value="0">
-    <input type="hidden" id="fNerf" value="0">
+    <input type="hidden" id="sheetPreservation" value="0">
+    <input type="hidden" id="sheetRetire" value="0">
 </div>
 
 <div class="footer">
@@ -324,51 +326,46 @@
         if(!nick) return;
         
         msg.innerText = "조회 중...";
-        msg.style.color = "#666";
-
         fetch(SCRIPT_URL + "?nickname=" + encodeURIComponent(nick))
             .then(res => res.json())
             .then(data => {
                 if(data.result === "success") {
                     msg.innerText = "✅ 데이터 로드 성공";
                     msg.style.color = "#2563eb";
-                    
                     const d = data.details;
+
+                    // 나이 및 군필 자동 체크
                     const sAge = Number(d.age) || 20;
                     const sRook = Number(d.rookie) || 0;
-
                     document.getElementById('ageSlider').value = sAge;
                     document.getElementById('ageLabel').innerText = sAge;
-
-                    // [자동 군필 판정]
                     document.getElementById('armyCheck').checked = 
                         (sAge === 21 && sRook === 30) || (sAge === 22 && sRook === 20) || (sAge === 23 && sRook === 10);
 
-                    // [상세 내역 표시]
-                    document.getElementById('viewName').innerText = `🔍 ${data.nickname}님의 버프, 너프`;
+                    // 상세 내역 전체 출력 (간략화 없음)
                     document.getElementById('viewRows').innerHTML = `
-                        <span class="detail-category">버프(Buff)</span>
-                        <div class="detail-row"><span>신인 버프</span><span class="txt-blue">+${d.rookie}</span></div>
+                        <span class="detail-category">버프 리스트</span>
                         <div class="detail-row"><span>보존 버프</span><span class="txt-blue">+${d.preservation}</span></div>
                         <div class="detail-row"><span>국대 버프</span><span class="txt-blue">+${d.national}</span></div>
-                        <div class="detail-row"><span>교육리그(승리 팀)</span><span class="txt-blue">+${d.eduWin}</span></div>
-                        <div class="detail-row"><span>교육리그(우수 선수) MVP</span><span class="txt-blue">+${d.eduMvp}</span></div>
+                        <div class="detail-row"><span>교육 우승</span><span class="txt-blue">+${d.eduWin}</span></div>
+                        <div class="detail-row"><span>교육 MVP</span><span class="txt-blue">+${d.eduMvp}</span></div>
                         <div class="detail-row"><span>기타 버프</span><span class="txt-blue">+${d.buffEtc}</span></div>
+                        <div class="detail-row"><span>신인(시트)</span><span class="txt-blue">+${d.rookie}</span></div>
                         
-                        <span class="detail-category">너프(Nerf)</span>
+                        <span class="detail-category">너프 리스트</span>
                         <div class="detail-row"><span>은퇴 너프</span><span class="txt-red">-${d.retire}</span></div>
-                        <div class="detail-row"><span>노화 너프</span><span class="txt-red">-${d.aging}</span></div>
                         <div class="detail-row"><span>기타 너프</span><span class="txt-red">-${d.nerfEtc}</span></div>
+                        <div class="detail-row"><span>노화(시트)</span><span class="txt-red">-${d.aging}</span></div>
                     `;
                     document.getElementById('detailView').style.display = "block";
 
-                    // [수치 고정 포인트]
-                    // aging은 슬라이더로 재계산하므로 제외, retire와 nerfEtc는 고정값으로 저장
-                    const fixedB = Number(d.preservation) + Number(d.army) + Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
-                    const fixedN = Number(d.nerfEtc) + Number(d.retire); 
+                    // 고정값 및 수정 가능 칸 세팅
+                    document.getElementById('sheetPreservation').value = d.preservation;
+                    document.getElementById('sheetRetire').value = d.retire;
                     
-                    document.getElementById('fBuff').value = fixedB;
-                    document.getElementById('fNerf').value = fixedN;
+                    // 수동 입력 칸에는 시트의 국대+교육+기타 버프/너프만 합쳐서 기본값 제공
+                    document.getElementById('manualBuff').value = Number(d.national) + Number(d.eduWin) + Number(d.eduMvp) + Number(d.buffEtc);
+                    document.getElementById('manualNerf').value = d.nerfEtc;
 
                     calculate();
                 } else {
@@ -385,35 +382,36 @@
         const p = Number(document.getElementById('pIn').value) || 0;
         const c = Number(document.getElementById('cIn').value) || 0;
         
-        const fBuff = Number(document.getElementById('fBuff').value) || 0;
-        const fNerf = Number(document.getElementById('fNerf').value) || 0;
+        const sPreserve = Number(document.getElementById('sheetPreservation').value) || 0;
+        const sRetire = Number(document.getElementById('sheetRetire').value) || 0;
+        const mBuff = Number(document.getElementById('manualBuff').value) || 0;
+        const mNerf = Number(document.getElementById('manualNerf').value) || 0;
 
-        // [신인 버프 재계산]
+        // 가변 나이 버프/너프 계산
         let rBuff = 0;
         const rAge = isArmy ? age - 1 : age;
-        if(rAge === 20) rBuff = 30; 
-        else if(rAge === 21) rBuff = 20; 
-        else if(rAge === 22) rBuff = 10;
+        if(rAge === 20) rBuff = 30; else if(rAge === 21) rBuff = 20; else if(rAge === 22) rBuff = 10;
 
-        // [노화 너프 재계산 (35세~)]
         let aNerf = 0;
         for (let i = 35; i <= age; i++) {
-            if (i <= 36) aNerf += 10;
-            else if (i <= 39) aNerf += 30;
-            else if (i <= 42) aNerf += 50;
-            else aNerf += 60;
+            if (i <= 36) aNerf += 10; else if (i <= 39) aNerf += 30; else if (i <= 42) aNerf += 50; else aNerf += 60;
         }
 
-        const pure = (v * WV) + (p * WP) + (c * WC);
-        const final = pure + fBuff + rBuff - fNerf - aNerf;
+        const activity = (v * WV) + (p * WP) + (c * WC);
+        const pureStats = activity + sPreserve - sRetire;
+        const finalStats = pureStats + mBuff + rBuff - mNerf - aNerf;
 
-        document.getElementById('sumB').innerText = fBuff + rBuff;
-        document.getElementById('sumN').innerText = fNerf + aNerf;
-        document.getElementById('pureLabel').innerText = pure.toFixed(2);
-        document.getElementById('finalLabel').innerText = final.toFixed(2);
+        document.getElementById('pureLabel').innerText = pureStats.toFixed(2);
+        document.getElementById('finalLabel').innerText = finalStats.toFixed(2);
         
-        let tagMsg = rBuff > 0 ? `신인 버프 +${rBuff}` : (aNerf > 0 ? `누적 노화 너프 -${aNerf}` : `나이 영향 없음`);
-        document.getElementById('ageTag').innerText = tagMsg;
+        // 하단 태그 조건부 표시
+        const tag = document.getElementById('ageTag');
+        if (rBuff > 0 || aNerf > 0) {
+            tag.style.display = "inline-block";
+            tag.innerText = rBuff > 0 ? `신인 버프 +${rBuff}` : `누적 노화 너프 -${aNerf}`;
+        } else {
+            tag.style.display = "none";
+        }
     }
 </script>
 </body>
