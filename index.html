@@ -54,7 +54,7 @@
             cursor: pointer;
         }
 
-        /* 상세 내역 (한 줄씩 표시) */
+        /* 상세 내역 */
         .details-box { 
             display: none; 
             margin-top: 15px; 
@@ -106,8 +106,16 @@
         .pure-text { font-size: 0.9em; opacity: 0.85; margin-bottom: 5px; }
         .final-score { font-size: 2.8em; font-weight: 800; color: #fbbf24; display: block; }
 
-        /* 하단 링크 */
-        .footer-link { margin-top: 20px; text-align: center; padding-bottom: 20px; }
+        .notice-text {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        /* 하단 링크 및 버전 정보 */
+        .footer-area { margin-top: 20px; text-align: center; padding-bottom: 30px; }
         .footer-link a { 
             text-decoration: none; 
             color: #64748b; 
@@ -117,6 +125,12 @@
             background: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: inline-block;
+            margin-bottom: 15px;
+        }
+        .version-info {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -133,7 +147,7 @@
         <p id="searchMsg" style="margin: 10px 0 0 0; font-size: 0.8em; text-align: center; font-weight: 600;"></p>
 
         <div id="detailArea" class="details-box">
-            <span class="details-title">🔍 상세 데이터 내역</span>
+            <span class="details-title" id="dynamicTitle">🔍 상세 데이터 내역</span>
             <div id="detailContent"></div>
         </div>
     </div>
@@ -172,10 +186,17 @@
         <span class="final-score" id="finalStats">0</span>
         <div style="font-size:0.85em; opacity: 0.9;">최종 스탯</div>
     </div>
+    <span class="notice-text">* 실제 스탯 계산은 소수 첫째 자리에서 반올림됩니다.</span>
 </div>
 
-<div class="footer-link">
-    <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 바로가기</a>
+<div class="footer-area">
+    <div class="footer-link">
+        <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 바로가기</a>
+    </div>
+    <div class="version-info">
+        버전: v3.0.0b<br>
+        업데이트 날짜: 2026년 1월 31일
+    </div>
 </div>
 
 <script>
@@ -185,11 +206,17 @@
     const W_POST = 1/30;
     const W_COMMENT = 1/350;
 
+    // 소수점 셋째 자리에서 반올림하는 헬퍼 함수
+    function roundToTwo(num) {
+        return +(Math.round(num + "e+2") + "e-2");
+    }
+
     function searchNickname() {
         const nick = document.getElementById('nicknameInput').value;
         const msg = document.getElementById('searchMsg');
         const detailArea = document.getElementById('detailArea');
         const detailContent = document.getElementById('detailContent');
+        const title = document.getElementById('dynamicTitle');
 
         if(!nick) { alert("닉네임을 입력하세요."); return; }
         msg.innerText = "데이터 로딩 중...";
@@ -199,11 +226,13 @@
             .then(res => res.json())
             .then(data => {
                 if(data.result === "success") {
-                    msg.innerText = "✅ '" + data.nickname + "'님 데이터 적용 완료";
+                    msg.innerText = "✅ '" + data.nickname + "'님 버프 및 너프 적용 완료";
                     msg.style.color = "#2563eb";
+                    
+                    // 제목 변경
+                    title.innerText = `🔍 ${data.nickname}님의 버프 및 너프`;
 
                     const d = data.details;
-                    // 항목별 한 줄씩 출력되도록 수정
                     detailContent.innerHTML = `
                         <div class="details-row"><span>보존 버프</span> <span class="val-buff">+${d.preservation}</span></div>
                         <div class="details-row"><span>신인 버프</span> <span class="val-buff">+${d.rookie}</span></div>
@@ -241,8 +270,9 @@
         const pure = (v * W_VISIT) + (p * W_POST) + (c * W_COMMENT);
         const final = pure + buff - nerf + year; 
 
-        document.getElementById('pureStats').innerText = Math.round(pure).toLocaleString();
-        document.getElementById('finalStats').innerText = Math.round(final).toLocaleString();
+        // 결과값을 소수점 둘째 자리까지 표시 (셋째 자리에서 반올림)
+        document.getElementById('pureStats').innerText = roundToTwo(pure).toLocaleString();
+        document.getElementById('finalStats').innerText = roundToTwo(final).toLocaleString();
     }
 </script>
 
