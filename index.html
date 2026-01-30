@@ -11,8 +11,8 @@
         .container { width: 100%; max-width: 500px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h2 { text-align: center; color: #000; margin-bottom: 25px; font-weight: 800; }
         .search-box { background-color: #eff6ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #dbeafe; }
-        .search-row { display: flex; gap: 8px; }
-        .search-row input { flex: 1; padding: 12px; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 16px; }
+        .search-row { display: flex; gap: 8px; width: 100%; }
+        .search-row input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 16px; }
         .search-row button { padding: 0 20px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .details-box { display: none; margin-top: 15px; background: #fff; padding: 12px; border-radius: 8px; font-size: 0.85em; border: 1px solid #e2e8f0; }
         .details-title { font-weight: 700; color: #1e3a8a; margin-bottom: 8px; display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
@@ -34,7 +34,23 @@
         .pure-text { font-size: 0.9em; opacity: 0.85; margin-bottom: 5px; }
         .final-score { font-size: 2.8em; font-weight: 800; color: #fbbf24; display: block; }
         .age-tag { display: inline-block; margin-top: 10px; font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
-        .footer { margin-top: 20px; text-align: center; font-size: 0.75rem; color: #94a3b8; padding-bottom: 20px; }
+        .footer-area { margin-top: 20px; text-align: center; padding-bottom: 30px; }
+        .footer-link a { 
+            text-decoration: none; 
+            color: #64748b; 
+            font-size: 0.9em; 
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .version-info {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -61,7 +77,7 @@
         </div>
         <input type="range" id="ageSlider" min="20" max="55" value="20" oninput="updateAgeLabel()">
         <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; font-weight:600; color:#475569; cursor:pointer;">
-            <input type="checkbox" id="armyCheck" onchange="updateAgeLabel()"> 군필 여부 (21~23세 신인연장)
+            <input type="checkbox" id="armyCheck" onchange="updateAgeLabel()"> 신인 버프 연장
         </label>
     </div>
 
@@ -90,8 +106,15 @@
     </div>
 </div>
 
-<div class="footer">
-    버전: v3.0.0b | 최종 업데이트: 2026. 01. 31.
+<div class="footer-area">
+    <div class="footer-link">
+        <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 바로가기</a>
+        <a href="https://github.com/haesol00/ikbolCalculator" target="_blank">🛠️ 오류 및 건의 사항 (GitHub)</a>
+    </div>
+    
+    <div class="version-info">
+        버전: v3.0.0b  최종 업데이트 날짜: 2026. 1. 31.
+    </div>
 </div>
 
 <script>
@@ -100,6 +123,10 @@
 
     let baseBuff = 0;
     let baseNerf = 0;
+
+    window.onload = function() {
+        updateAgeLabel();
+    };
 
     function updateAgeLabel() {
         const age = Number(document.getElementById('ageSlider').value);
@@ -147,8 +174,7 @@
                     const sheetRookie = Number(d.rookie) || 0;
                     const sheetArmy = Number(d.army) || 0;
 
-                    // [핵심 로직] 조회 시 자동 군필 판정
-                    // 21세인데 30이거나, 22세인데 20이거나, 23세인데 10이면 "군필 연장"으로 간주
+                    // 자동 군필 판정
                     let autoArmyCheck = (sheetArmy > 0);
                     if (sheetAge === 21 && sheetRookie === 30) autoArmyCheck = true;
                     if (sheetAge === 22 && sheetRookie === 20) autoArmyCheck = true;
@@ -167,8 +193,8 @@
                         <div class="details-row"><span>신인 버프</span><span class="val-buff">+${d.rookie}</span></div>
                         <div class="details-row"><span>군대 버프</span><span class="val-buff">+${d.army}</span></div>
                         <div class="details-row"><span>국대 버프</span><span class="val-buff">+${d.national}</span></div>
-                        <div class="details-row"><span>교육리그(승리)</span><span class="val-buff">+${d.eduWin}</span></div>
-                        <div class="details-row"><span>교육리그(우수)</span><span class="val-buff">+${d.eduMvp}</span></div>
+                        <div class="details-row"><span>교육리그(승리팀)</span><span class="val-buff">+${d.eduWin}</span></div>
+                        <div class="details-row"><span>교육리그(우수 활동자)</span><span class="val-buff">+${d.eduMvp}</span></div>
                         <div class="details-row"><span>기타 버프</span><span class="val-buff">+${d.buffEtc}</span></div>
                         <div style="border-top:1px dashed #e2e8f0; margin:8px 0;"></div>
                         <div class="details-row"><span>은퇴 너프</span><span class="val-nerf">-${d.retire}</span></div>
