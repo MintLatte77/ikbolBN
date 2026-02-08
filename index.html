@@ -176,6 +176,7 @@
 
                     // 자동 군필 판정
                     let autoArmyCheck = (sheetArmy > 0);
+                    if (sheetAge === 20 && sheetRookie === 0) autoArmyCheck = true;
                     if (sheetAge === 21 && sheetRookie === 30) autoArmyCheck = true;
                     if (sheetAge === 22 && sheetRookie === 20) autoArmyCheck = true;
                     if (sheetAge === 23 && sheetRookie === 10) autoArmyCheck = true;
