@@ -148,6 +148,14 @@
                 fetchData();
             }
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlNickname = urlParams.get('nickname'); // 주소창에서 nickname 값 가져오기
+        
+        if (urlNickname) {
+            document.getElementById('nickInput').value = urlNickname;
+            fetchData();
+        }
     };
 
     function onToggleChange() {
