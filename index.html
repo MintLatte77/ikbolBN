@@ -64,6 +64,49 @@
             margin-bottom: 15px;
         }
         .version-info { font-size: 0.75rem; color: #94a3b8; line-height: 1.5; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background-color: rgba(30, 41, 59, 0.9);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .copy-btn {
+            text-decoration: none; 
+            color: #64748b; 
+            font-size: 0.9em; 
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            
+            display: block;
+            margin: 0 auto 15px auto;
+            width: max-content;
+            
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .copy-btn:hover {
+            background-color: #f1f5f9;
+        }
     </style>
 </head>
 <body>
@@ -123,13 +166,18 @@
 
 <div class="footer-area">
     <div class="footer-link">
+        <div class="footer-link">
         <a href="https://cafe.naver.com/best1ikbol" target="_blank">🏠 IKBOL 바로가기</a>
         <a href="https://github.com/haesol00/ikbolCalculator" target="_blank">🛠️ 오류 및 건의 사항 (GitHub)</a>
+        
+        <button class="copy-btn" onclick="copyShareLink()">🔗 현재 결과 링크 복사</button>
     </div>
     <div class="version-info">
         버전: v3.1.0 | 최종 업데이트 날짜: 2026. 5. 17.
     </div>
 </div>
+    
+<div id="toast" class="toast">링크가 클립보드에 복사되었습니다!</div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxU2yDECn-Py0RsiT-FtWRwpENkntivWfCq9nwWSwb7weCGIC-6tGUVv2bLj0euYqdB1A/exec";
@@ -291,6 +339,34 @@
         const act = (v * WV) + (p * WP) + (c * WC);
         document.getElementById('pureStats').innerText = act.toFixed(2);
         document.getElementById('finalStats').innerText = (act + buff - nerf).toFixed(2);
+    }
+    function copyShareLink() {
+        const nick = document.getElementById('nickInput').value.trim();
+        
+        // 현재 접속 중인 기본 URL 가져오기 (파라미터 제외한 순수 주소)
+        const baseUrl = window.location.origin + window.location.pathname;
+        
+        // 닉네임 입력 여부에 따라 주소 조합
+        const shareUrl = nick ? `${baseUrl}?nickname=${encodeURIComponent(nick)}` : baseUrl;
+
+        // 클립보드에 복사 실행
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            // 토스트 문구 설정
+            const toast = document.getElementById('toast');
+            if (nick) {
+                toast.innerText = `'${nick}'님의 결과 링크가 복사되었습니다!`;
+            } else {
+                toast.innerText = `기본 계산기 링크가 복사되었습니다!`;
+            }
+
+            // 토스트 알림 등장 애니메이션 후 2.5초 뒤 사라짐
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }).catch(err => {
+            alert('링크 복사에 실패했습니다. 주소창을 직접 복사해 주세요.');
+        });
     }
 </script>
 </body>
